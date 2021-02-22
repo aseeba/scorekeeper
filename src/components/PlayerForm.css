@@ -1,0 +1,10 @@
+.PlayerForm {
+    width: 100%;
+}
+
+.PlayerForm input {
+    border: 2px solid darkturquoise;
+    width: 100%;
+    background: turquoise;
+    opacity: 0.7;
+}
