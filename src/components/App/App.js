@@ -1,74 +1,117 @@
 import React from 'react'
 import { useState } from 'react'
-import './App.css'
-import PlayerForm from '../PlayerForm/PlayerForm'
-import Header from '../Header/Header'
+import { v4 as uuidv4 } from 'uuid'
+import styled from 'styled-components/macro'
 import Player from '../Player/Player'
 import Button from '../Button/Button'
+import HistoryEntry from '../HistoryEntry/HistoryEntry'
+import Navigation from '../Navigation/Navigation'
+import GameForm from '../GameForm/GameForm'
+import AppHeader from '../AppHeader/AppHeader'
 
 function App() {
+  const [players, setPlayers] = useState([])
+  const [currentPage, setCurrentPage] = useState('play')
+  const [nameOfGame, setNameOfGame] = useState('')
+  const[history, setHistory] = useState([])
 
-const [players, setPlayers] = useState([])
-
-function handleAddPlayer(name){
-  setPlayers(oldPlayers => [...oldPlayers, {name, score: 0}])
-}
-
-function handlePlus(index){
-  setPlayers(players => [
-    ...players.slice(0, index),
-    { ...players[index], score: players[index].score + 1 },
-    ...players.slice(index + 1),
-  ])
-}
-
-function handleMinus(index){
-  setPlayers(players => [
-    ...players.slice(0, index),
-    { ...players[index], score: players[index].score - 1 },
-    ...players.slice(index + 1),
-  ])
-}
-
-function resetAll(){
-setPlayers([])
-}
-
-function resetScore(name){
-  setPlayers(players.map(player => ({ ...player, score: 0 })))
-}
 
   return (
-    <>
-    <Header title="SCORE KEEPER" />
-    
-    <div className="App">
+    <AppLayout>
+    <AppHeader>SCORE KEEPER</AppHeader>
 
-    <main className="App__main">
-      <PlayerForm onAddPlayer={handleAddPlayer} />
-
-      {players.map((player, index) =>
-      <Player
-      name={player.name}
-      score={player.score}
-      onPlus={() => handlePlus(index)}
-      onMinus={() => handleMinus(index)}
-      />
+  <AppGrid>
+      {/* conditional rendering */}
+      {currentPage === 'play' && (
+        <div>
+          <GameForm onCreateGame={createGame} />
+        </div>
       )}
 
-      <Button
-        text={"Reset Scores"}
-        onClick={resetScore}></Button>
+      {currentPage === 'game' && (
+        <GameWrapper>
+          {nameOfGame}
+          {players.map(({ name, score }, index) => (
+            <Player
+              key={name}
+              name={name}
+              score={score}
+              onPlus={() => handlePlus(index)}
+              onMinus={() => handleMinus(index)}
+            />
+          ))}
+          <Button onClick={resetScores}>Reset scores</Button>
+          <Button onClick={endGame}>End game</Button>
+        </GameWrapper>
+      )}
 
-      <Button
-        text={"Reset all"}
-        onClick={resetAll}
-      ></Button>
+{currentPage === 'history' && (
+        <HistoryWrapper>
+          {history.map(({ nameOfGame, players, id }) => (
+            <HistoryEntry key={id} nameOfGame={nameOfGame} players={players} />
+          ))}
+        </HistoryWrapper>
+      )}
 
-      </main>
-      </div>
-    </>
-  )
-}
+      {(currentPage === 'play' || currentPage === 'history') && (
+        <Navigation currentPage={currentPage} onNavigate={setCurrentPage} />
+      )}
+      </AppGrid>
+      </AppLayout>
+   )
 
-export default App
+   function createGame({ nameOfGame, playerNames }) {
+    setNameOfGame(nameOfGame)
+    setPlayers(playerNames.map(name => ({ name, score: 0 })))
+    setCurrentPage('game')
+  }
+
+  function endGame() {
+    setHistory([{ players, nameOfGame, id: uuidv4() }, ...history])
+    setPlayers([])
+    setNameOfGame('')
+    setCurrentPage('play')
+  }
+ 
+   function resetScores() {
+     setPlayers(players.map(player => ({ ...player, score: 0 })))
+   }
+ 
+   function handlePlus(index) {
+     const currentPlayer = players[index]
+     setPlayers([
+       ...players.slice(0, index),
+       { ...currentPlayer, score: currentPlayer.score + 1 },
+       ...players.slice(index + 1),
+     ])
+   }
+ 
+   function handleMinus(index) {
+     const currentPlayer = players[index]
+     setPlayers([
+       ...players.slice(0, index),
+       { ...currentPlayer, score: currentPlayer.score - 1 },
+       ...players.slice(index + 1),
+     ])
+   }
+ }
+
+ export default App
+
+ const AppLayout = styled.main`
+margin: 0;
+ `
+
+const AppGrid = styled.div`
+  display: grid;
+  gap: 20px;
+  padding: 20px;
+  `
+
+const HistoryWrapper = styled.div`
+display: grid;
+gap: 20px;`
+
+const GameWrapper = styled.div`
+display: grid;
+gap: 20px;`
