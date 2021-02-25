@@ -7,4 +7,5 @@ color: ${props => props.isActive ? "darkturquoise" : "rgb(0, 39, 39)"};
 font-weight: ${props => props.isActive ? "600" : "400"};
 border: none;
 width: 100%;
+font-family: inherit
 `
