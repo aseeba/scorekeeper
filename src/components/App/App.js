@@ -2,16 +2,15 @@ import React from 'react'
 import { useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import styled from 'styled-components/macro'
-import Player from '../Player/Player'
-import Button from '../Button/Button'
-import HistoryEntry from '../HistoryEntry/HistoryEntry'
-import Navigation from '../Navigation/Navigation'
-import GameForm from '../GameForm/GameForm'
 import AppHeader from '../AppHeader/AppHeader'
+import Navigation from '../Navigation/Navigation'
+import CreatePage from '../CreatePage/CreatePage'
+import GamePage from '../GamePage/GamePage'
+import HistoryPage from '../HistoryPage/HistoryPage'
 
-function App() {
+export default function App() {
   const [players, setPlayers] = useState([])
-  const [currentPage, setCurrentPage] = useState('play')
+  const [currentPage, setCurrentPage] = useState('create')
   const [nameOfGame, setNameOfGame] = useState('')
   const[history, setHistory] = useState([])
 
@@ -22,40 +21,27 @@ function App() {
 
   <AppGrid>
       {/* conditional rendering */}
-      {currentPage === 'play' && (
-        <div>
-          <GameForm onCreateGame={createGame} />
-        </div>
-      )}
+      {currentPage === 'create' && 
+      <CreatePage onCreateGame={createGame} />}
 
       {currentPage === 'game' && (
-        <GameWrapper>
-          {nameOfGame}
-          {players.map(({ name, score }, index) => (
-            <Player
-              key={name}
-              name={name}
-              score={score}
-              onPlus={() => handlePlus(index)}
-              onMinus={() => handleMinus(index)}
-            />
-          ))}
-          <Button onClick={resetScores}>Reset scores</Button>
-          <Button onClick={endGame}>End game</Button>
-        </GameWrapper>
+        <GamePage
+          nameOfGame={nameOfGame}
+          players={players}
+          onMinus={handleMinus}
+          onPlus={handlePlus}
+          onReset={resetScores}
+          onEnd={endGame}
+        />
       )}
 
-{currentPage === 'history' && (
-        <HistoryWrapper>
-          {history.map(({ nameOfGame, players, id }) => (
-            <HistoryEntry key={id} nameOfGame={nameOfGame} players={players} />
-          ))}
-        </HistoryWrapper>
-      )}
+      {currentPage === 'history' && 
+      <HistoryPage history={history} />}
 
-      {(currentPage === 'play' || currentPage === 'history') && (
+      {(currentPage === 'create' || currentPage === 'history') && (
         <Navigation currentPage={currentPage} onNavigate={setCurrentPage} />
       )}
+
       </AppGrid>
       </AppLayout>
    )
@@ -96,8 +82,6 @@ function App() {
    }
  }
 
- export default App
-
  const AppLayout = styled.main`
 margin: 0;
  `
@@ -107,11 +91,3 @@ const AppGrid = styled.div`
   gap: 20px;
   padding: 20px;
   `
-
-const HistoryWrapper = styled.div`
-display: grid;
-gap: 20px;`
-
-const GameWrapper = styled.div`
-display: grid;
-gap: 20px;`

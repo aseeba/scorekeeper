@@ -38,3 +38,7 @@ const GameFormWrapper = styled.form`
     display: grid;
     gap: 10px;
     `
+
+// const GameWrapper = styled.div`
+// display: grid;
+// gap: 20px;`
